@@ -9,9 +9,7 @@
 	<slot />
 </main>
 
-<footer>
-	<!-- <p>Footer</p> -->
-</footer>
+<footer />
 
 <style>
 	main {
@@ -21,7 +19,7 @@
 		padding: 1rem;
 		width: 100%;
 		max-width: 1024px;
-		margin: 0 auto;
+		margin: 2rem auto 0 auto;
 		box-sizing: border-box;
 	}
 

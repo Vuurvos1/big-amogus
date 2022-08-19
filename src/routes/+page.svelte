@@ -1,4 +1,6 @@
 <script>
+	export let data;
+	const { next, live } = data;
 </script>
 
 <svelte:head>
@@ -8,6 +10,24 @@
 
 <section>
 	<h1>Oengus Schedules</h1>
+
+	<h2>Live marathons</h2>
+	<ul>
+		{#each live as marathon}
+			<li>
+				<a href={`/${marathon.id}`}>{marathon.name}</a>
+			</li>
+		{/each}
+	</ul>
+
+	<h2>Upcomming marathons</h2>
+	<ul>
+		{#each next as marathon}
+			<li>
+				<a href={`/${marathon.id}`}>{marathon.name}</a>
+			</li>
+		{/each}
+	</ul>
 </section>
 
 <style>
@@ -21,21 +41,5 @@
 
 	h1 {
 		width: 100%;
-	}
-
-	.welcome {
-		display: block;
-		position: relative;
-		width: 100%;
-		height: 0;
-		padding: 0 0 calc(100% * 495 / 2048) 0;
-	}
-
-	.welcome img {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		top: 0;
-		display: block;
 	}
 </style>

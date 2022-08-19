@@ -1,11 +1,10 @@
 <script>
 	import { page } from '$app/stores';
-	import logo from './svelte-logo.svg';
 </script>
 
 <header>
 	<div class="corner">
-		<!-- blanc -->
+		<!-- blank -->
 	</div>
 
 	<nav>
@@ -27,6 +26,9 @@
 
 <style>
 	header {
+		position: fixed;
+		width: 100vw;
+		top: 0;
 		display: flex;
 		justify-content: space-between;
 	}
@@ -44,16 +46,10 @@
 		height: 100%;
 	}
 
-	.corner img {
-		width: 2em;
-		height: 2em;
-		object-fit: contain;
-	}
-
 	nav {
 		display: flex;
 		justify-content: center;
-		--background: rgba(255, 255, 255, 0.7);
+		--background: white;
 	}
 
 	svg {

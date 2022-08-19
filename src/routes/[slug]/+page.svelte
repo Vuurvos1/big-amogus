@@ -33,6 +33,8 @@
 				return runs[i];
 			}
 		}
+
+		return [];
 	}
 
 	let interval;
@@ -65,8 +67,9 @@
 </script>
 
 <h1>{$page.params.slug}</h1>
-
-<a href="#{currentRun.id}"> Jump to current run </a>
+{#if time >= new Date(runs[0].date) && time <= new Date(runs[runs.length - 1].date)}
+	<a href="#{currentRun.id}"> Jump to current run </a>
+{/if}
 
 <div class="runsHeader">
 	<!-- header -->
@@ -123,6 +126,10 @@
 </div>
 
 <style>
+	:global(html) {
+		scroll-padding-top: 4rem;
+	}
+
 	a {
 		text-align: center;
 	}
