@@ -39,30 +39,37 @@
 
 	let interval;
 	let timer;
+	let timeOut;
 	onMount(() => {
 		// this could be done over a websocket if one exists???
 		interval = setInterval(async () => {
 			// refetch runs data every 5 minutes
 			try {
-				const res = await fetch(`https://oengus.io/api/marathons/${page.params.slug}/schedule`);
+				const res = await fetch(`https://oengus.io/api/marathons/${$page.params.slug}/schedule`);
 				data = await res.json();
 			} catch (err) {
 				console.error('error updating schedule data');
 			}
 		}, 1000 * 60 * 5);
 
-		timer = setInterval(() => {
-			// upate time every minute
-			// make this so this actually updates every real minute (offset with setTimeout)
+		timeOut = setTimeout(() => {
 			time = new Date();
-
 			currentRun = getCurrentRun();
-		}, 1000 * 60);
+
+			// start timer
+			timer = setInterval(() => {
+				// upate time every minute
+				time = new Date();
+				currentRun = getCurrentRun();
+			}, 1000 * 60);
+			// this is precise to the second, could maybe should also compensate ms
+		}, (60 - time.getSeconds()) * 1000);
 	});
 
 	onDestroy(() => {
 		clearInterval(interval);
 		clearInterval(timer);
+		clearTimeout(timeOut);
 	});
 </script>
 
@@ -71,8 +78,8 @@
 	<a href="#{currentRun.id}"> Jump to current run </a>
 {/if}
 
+<!-- header -->
 <div class="runsHeader">
-	<!-- header -->
 	<p>Time</p>
 	<p>Runner(s)</p>
 	<p>Game</p>

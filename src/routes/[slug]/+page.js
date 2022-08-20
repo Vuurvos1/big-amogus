@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 
 /** @type {import('./$types').PageLoad} */
-export async function load({ params }) {
+export async function load({ fetch, params }) {
 	try {
 		const res = await fetch(`https://oengus.io/api/marathons/${params.slug}/schedule`);
 		return await res.json();
