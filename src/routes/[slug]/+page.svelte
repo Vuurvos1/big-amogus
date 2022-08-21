@@ -8,13 +8,20 @@
 	let runs = data.lines;
 	let currentRun = getCurrentRun();
 
-	// format date to hh:mm
+	/**
+	 *  format date to hh:mm
+	 *  @param {Date} date - input date
+	 */
 	function getHHMM(date) {
 		const hours = date.getHours();
 		const mins = date.getMinutes();
 		return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
 	}
 
+	/**
+	 *  format date to hh:mm
+	 *  @param {String} str - input date
+	 */
 	function formatDuration(str) {
 		if (!str) return '';
 		const hours = str.match(/(\d+)\s*H/);
@@ -37,9 +44,13 @@
 		return [];
 	}
 
+	/** @type {setInterval | any} */
 	let interval;
+	/** @type {setInterval | any} */
 	let timer;
+	/** @type {setTimeout | any} */
 	let timeOut;
+
 	onMount(() => {
 		// this could be done over a websocket if one exists???
 		interval = setInterval(async () => {
