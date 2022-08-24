@@ -3,6 +3,8 @@
 	import { onDestroy, onMount } from 'svelte';
 	export let data;
 
+	const MINUTE = 60 * 1000;
+
 	let time = new Date();
 
 	let runs = data.lines;
@@ -61,7 +63,7 @@
 			} catch (err) {
 				console.error('error updating schedule data');
 			}
-		}, 1000 * 60 * 5);
+		}, MINUTE * 5);
 
 		timeOut = setTimeout(() => {
 			time = new Date();
@@ -72,9 +74,9 @@
 				// upate time every minute
 				time = new Date();
 				currentRun = getCurrentRun();
-			}, 1000 * 60);
-			// this is precise to the second, could maybe should also compensate ms
-		}, (60 - time.getSeconds()) * 1000);
+			}, MINUTE);
+			// offset timer to next full minute
+		}, MINUTE - (new Date().getTime() % MINUTE));
 	});
 
 	onDestroy(() => {
