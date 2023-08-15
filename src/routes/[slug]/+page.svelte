@@ -8,7 +8,7 @@
 	let time = new Date();
 
 	let runs = data.lines;
-	let currentRun = getCurrentRun();
+	$: currentRun = runs.find((run, i, runs) => runs[i + 1] && time < new Date(runs[i + 1].date) && new Date(run.date) < time); 
 
 	/**
 	 *  format date to hh:mm
@@ -35,22 +35,11 @@
 		}:${seconds ? seconds[1].padStart(2, '0') : '00'}`;
 	}
 
-	function getCurrentRun() {
-		for (let i = 0; i < runs.length; i++) {
-			const run = runs[i];
-			if (runs[i + 1] && time < new Date(runs[i + 1].date) && new Date(run.date) < time) {
-				return runs[i];
-			}
-		}
-
-		return [];
-	}
-
-	/** @type {setInterval | any} */
+	/** @type {number} */
 	let interval;
-	/** @type {setInterval | any} */
+	/** @type {number} */
 	let timer;
-	/** @type {setTimeout | any} */
+	/** @type {number} */
 	let timeOut;
 
 	onMount(() => {
@@ -67,13 +56,11 @@
 
 		timeOut = setTimeout(() => {
 			time = new Date();
-			currentRun = getCurrentRun();
 
 			// start timer
 			timer = setInterval(() => {
 				// upate time every minute
 				time = new Date();
-				currentRun = getCurrentRun();
 			}, MINUTE);
 			// offset timer to next full minute
 		}, MINUTE - (new Date().getTime() % MINUTE));
@@ -87,7 +74,7 @@
 </script>
 
 <h1>{$page.params.slug}</h1>
-{#if time >= new Date(runs[0].date) && time <= new Date(runs[runs.length - 1].date)}
+{#if currentRun}
 	<a href="#{currentRun.id}"> Jump to current run </a>
 {/if}
 
@@ -106,8 +93,9 @@
 		{#if i == 0 || (i > 1 && new Date(runs[i - 1].date).getDay() != new Date(run.date).getDay())}
 			<div class="timie">
 				{new Date(run.date).toLocaleDateString('default', {
-					day: '2-digit',
+					weekday: 'long',
 					month: 'long',
+					day: '2-digit',
 					year: 'numeric'
 				})}
 			</div>
@@ -164,12 +152,15 @@
 	}
 
 	.timie {
+		position: sticky;
+		top: 0;
 		padding: 1rem;
 		background-color: lightseagreen;
 		text-align: center;
 	}
 
 	.runs {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 	}
