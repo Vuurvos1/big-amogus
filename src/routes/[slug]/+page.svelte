@@ -1,4 +1,5 @@
 <script>
+	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onDestroy, onMount } from 'svelte';
 	export let data;
@@ -47,8 +48,7 @@
 		interval = setInterval(async () => {
 			// refetch runs data every 5 minutes
 			try {
-				const res = await fetch(`https://oengus.io/api/marathons/${$page.params.slug}/schedule`);
-				data = await res.json();
+				invalidateAll();
 			} catch (err) {
 				console.error('error updating schedule data');
 			}
