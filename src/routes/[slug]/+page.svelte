@@ -73,6 +73,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Bigoengus - {$page.params.slug}</title>
+</svelte:head>
+
 <h1>{$page.params.slug}</h1>
 {#if currentRun}
 	<a href="#{currentRun.id}"> Jump to current run </a>
