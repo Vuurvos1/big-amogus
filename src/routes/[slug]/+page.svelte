@@ -105,7 +105,7 @@
 			</div>
 		{/if}
 		<!-- this might not highlight the first run of a schedule -->
-		<div class="run" id={run.id} class:active={run.id === currentRun.id}>
+		<div class="run" id={String(run.id)} class:active={run.id === currentRun?.id}>
 			<time>{getHHMM(new Date(run.date))}</time>
 			{#if run.runners.length > 0}
 				<div>
