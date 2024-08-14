@@ -39,6 +39,10 @@
 		flex: 1;
 	}
 
+	ul {
+		margin: 1em 0;
+	}
+
 	h1 {
 		width: 100%;
 	}

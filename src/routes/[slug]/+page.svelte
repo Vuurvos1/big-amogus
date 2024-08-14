@@ -9,7 +9,9 @@
 	let time = new Date();
 
 	let runs = data.lines;
-	$: currentRun = runs.find((run, i, runs) => runs[i + 1] && time < new Date(runs[i + 1].date) && new Date(run.date) < time); 
+	$: currentRun = runs.find(
+		(run, i, runs) => runs[i + 1] && time < new Date(runs[i + 1].date) && new Date(run.date) < time
+	);
 
 	/**
 	 *  format date to hh:mm
@@ -94,46 +96,68 @@
 
 <div class="runs">
 	{#each runs as run, i}
-		{#if i == 0 || (i > 1 && new Date(runs[i - 1].date).getDay() != new Date(run.date).getDay())}
-			<div class="timie">
-				{new Date(run.date).toLocaleDateString('default', {
-					weekday: 'long',
-					month: 'long',
-					day: '2-digit',
-					year: 'numeric'
-				})}
-			</div>
-		{/if}
-		<!-- this might not highlight the first run of a schedule -->
-		<div class="run" id={String(run.id)} class:active={run.id === currentRun?.id}>
-			<time>{getHHMM(new Date(run.date))}</time>
-			{#if run.runners.length > 0}
+		<details class="run" id={String(run.id)} class:active={run.id === currentRun?.id}>
+			<summary>
+				{#if i == 0 || (i > 1 && new Date(runs[i - 1].date).getDay() != new Date(run.date).getDay())}
+					<div class="timie">
+						{new Date(run.date).toLocaleDateString('default', {
+							weekday: 'long',
+							month: 'long',
+							day: '2-digit',
+							year: 'numeric'
+						})}
+					</div>
+				{/if}
+				<!-- this might not highlight the first run of a schedule -->
 				<div>
-					{#each run.runners as runner}
-						<p>
-							{runner.username}
-						</p>
-					{/each}
+					<time>{getHHMM(new Date(run.date))}</time>
+					{#if run.runners.length > 0}
+						<div>
+							{#each run.runners as runner}
+								<p>
+									{runner.username}
+								</p>
+							{/each}
+						</div>
+					{/if}
+					<!-- game -->
+					{#if run.setupBlockText}
+						<p>{run.setupBlockText}</p>
+					{:else if run.setupBlock}
+						<p>Setup Block</p>
+					{:else}
+						<p>{run.gameName}</p>
+					{/if}
+
+					<!-- cat -->
+					{#if run.categoryName}
+						<p>{run.categoryName}</p>
+					{/if}
+
+					<!-- est -->
+					<p>{formatDuration(run.estimate)}</p>
 				</div>
-			{/if}
-			<!-- game -->
-			{#if run.setupBlockText}
-				<p>{run.setupBlockText}</p>
-			{:else if run.setupBlock}
-				<p>Setup Block</p>
-			{:else}
-				<p>{run.gameName}</p>
-			{/if}
+			</summary>
 
-			<!-- cat -->
-			{#if run.categoryName}
-				<p>{run.categoryName}</p>
-			{/if}
+			<div>
+				<dl>
+					{#if run.setupTime}
+						<dt>Setup Time</dt>
+						<dd>{formatDuration(run.setupTime)}</dd>
+					{/if}
 
-			<!-- est -->
-			<p>{formatDuration(run.estimate)}</p>
-		</div>
-		<!-- content here -->
+					{#if run.console}
+						<dt>Console</dt>
+						<dd>{run.console}</dd>
+					{/if}
+
+					{#if run.type}
+						<dt>Type</dt>
+						<dd>{run.type}</dd>
+					{/if}
+				</dl>
+			</div>
+		</details>
 	{/each}
 </div>
 
@@ -149,10 +173,12 @@
 	.runsHeader {
 		display: flex;
 		flex-direction: row;
+		padding: 0 0.5rem;
 	}
 
 	.runsHeader > * {
 		width: 100%;
+		margin: 1rem 0;
 	}
 
 	.timie {
@@ -169,6 +195,24 @@
 		flex-direction: column;
 	}
 
+	.run > *:first-child {
+		/* margin-left: 0.75rem; */
+	}
+
+	.run > *:last-child {
+		/* margin-right: 0.75rem;    */
+	}
+
+	dl {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 0.25rem 1rem;
+	}
+
+	dl dt {
+		font-weight: 600;
+	}
+
 	.run:nth-child(odd) {
 		background-color: hotpink;
 	}
@@ -177,13 +221,15 @@
 		background-color: lime;
 	}
 
-	.run {
+	.run > summary > * {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
+		gap: 0.25rem;
+		padding: 1rem 0.75rem;
 	}
 
-	.run > * {
+	.run > summary > * > * {
 		width: 25%;
 		overflow-x: auto;
 	}
@@ -194,5 +240,29 @@
 
 	.run.active * {
 		color: red;
+	}
+
+	details summary::-webkit-details-marker {
+		display: none;
+	}
+
+	details summary {
+		cursor: pointer;
+	}
+
+	details summary > * {
+		display: inline;
+	}
+
+	details > summary {
+		list-style: none;
+	}
+	details > summary::-webkit-details-marker {
+		display: none;
+	}
+
+	details > div {
+		border-top: 1px solid rgba(0, 0, 0, 0.2);
+		padding: 0.5rem 2rem;
 	}
 </style>

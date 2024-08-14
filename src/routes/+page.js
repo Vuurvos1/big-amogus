@@ -6,6 +6,6 @@ export async function load({ fetch, params }) {
 		const res = await fetch(`https://oengus.io/api/v1/marathons/`);
 		return await res.json();
 	} catch (err) {
-		throw error(404, 'Not found');
+		error(404, 'Not found');
 	}
 }
