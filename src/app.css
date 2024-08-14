@@ -101,6 +101,10 @@ pre {
 	color: var(--text-color);
 }
 
+button {
+	border: none;
+}
+
 input,
 button {
 	font-size: inherit;

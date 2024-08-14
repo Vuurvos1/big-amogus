@@ -45,6 +45,9 @@
 	/** @type {number} */
 	let timeOut;
 
+	/** @type {number | null} */
+	let activeRun = null;
+
 	onMount(() => {
 		// this could be done over a websocket if one exists???
 		interval = setInterval(async () => {
@@ -90,74 +93,94 @@
 	<p>Runner(s)</p>
 	<p>Game</p>
 	<p>Category</p>
-	<!-- <p>Type</p> -->
 	<p>Estimate</p>
 </div>
 
 <div class="runs">
 	{#each runs as run, i}
-		<details class="run" id={String(run.id)} class:active={run.id === currentRun?.id}>
-			<summary>
-				{#if i == 0 || (i > 1 && new Date(runs[i - 1].date).getDay() != new Date(run.date).getDay())}
-					<div class="timie">
-						{new Date(run.date).toLocaleDateString('default', {
-							weekday: 'long',
-							month: 'long',
-							day: '2-digit',
-							year: 'numeric'
-						})}
+		<!-- this might not highlight the first run of a schedule -->
+		{#if i == 0 || (i > 1 && new Date(runs[i - 1].date).getDay() != new Date(run.date).getDay())}
+			<div class="timie">
+				{new Date(run.date).toLocaleDateString('default', {
+					weekday: 'long',
+					month: 'long',
+					day: '2-digit',
+					year: 'numeric'
+				})}
+			</div>
+		{/if}
+
+		<button
+			class="run"
+			id={String(run.id)}
+			class:active={run.id === currentRun?.id}
+			on:click={() => {
+				if (activeRun === run.id) {
+					activeRun = null;
+					return;
+				}
+
+				activeRun = run.id;
+			}}
+		>
+			<div class="runSummary">
+				<div>
+					{#if activeRun === run.id}
+						v
+					{:else}
+						&gt;
+					{/if}
+				</div>
+
+				<time>{getHHMM(new Date(run.date))}</time>
+				{#if run.runners.length > 0}
+					<div>
+						{#each run.runners as runner}
+							<p>
+								{runner.username}
+							</p>
+						{/each}
 					</div>
 				{/if}
-				<!-- this might not highlight the first run of a schedule -->
-				<div>
-					<time>{getHHMM(new Date(run.date))}</time>
-					{#if run.runners.length > 0}
-						<div>
-							{#each run.runners as runner}
-								<p>
-									{runner.username}
-								</p>
-							{/each}
-						</div>
-					{/if}
-					<!-- game -->
-					{#if run.setupBlockText}
-						<p>{run.setupBlockText}</p>
-					{:else if run.setupBlock}
-						<p>Setup Block</p>
-					{:else}
-						<p>{run.gameName}</p>
-					{/if}
+				<!-- game -->
+				{#if run.setupBlockText}
+					<p>{run.setupBlockText}</p>
+				{:else if run.setupBlock}
+					<p>Setup Block</p>
+				{:else}
+					<p>{run.gameName}</p>
+				{/if}
 
-					<!-- cat -->
-					{#if run.categoryName}
-						<p>{run.categoryName}</p>
-					{/if}
+				<!-- cat -->
+				{#if run.categoryName}
+					<p>{run.categoryName}</p>
+				{/if}
 
-					<!-- est -->
-					<p>{formatDuration(run.estimate)}</p>
-				</div>
-			</summary>
-
-			<div>
-				<dl>
-					{#if run.setupTime}
-						<dt>Setup Time</dt>
-						<dd>{formatDuration(run.setupTime)}</dd>
-					{/if}
-
-					{#if run.console}
-						<dt>Console</dt>
-						<dd>{run.console}</dd>
-					{/if}
-
-					{#if run.type}
-						<dt>Type</dt>
-						<dd>{run.type}</dd>
-					{/if}
-				</dl>
+				<!-- est -->
+				<p>{formatDuration(run.estimate)}</p>
 			</div>
-		</details>
+
+			{#if activeRun === run.id}
+				<div class="runDetails">
+					<dl>
+						{#if run.setupTime}
+							<dt>Setup Time</dt>
+							<dd>{formatDuration(run.setupTime)}</dd>
+						{/if}
+
+						{#if run.console}
+							<dt>Console</dt>
+							<dd>{run.console}</dd>
+						{/if}
+
+						{#if run.type}
+							<dt>Type</dt>
+							<dd>{run.type}</dd>
+						{/if}
+					</dl>
+				</div>
+			{/if}
+		</button>
 	{/each}
 </div>
 
@@ -195,15 +218,8 @@
 		flex-direction: column;
 	}
 
-	.run > *:first-child {
-		/* margin-left: 0.75rem; */
-	}
-
-	.run > *:last-child {
-		/* margin-right: 0.75rem;    */
-	}
-
 	dl {
+		width: max-content;
 		display: grid;
 		grid-template-columns: auto 1fr;
 		gap: 0.25rem 1rem;
@@ -221,16 +237,14 @@
 		background-color: lime;
 	}
 
-	.run > summary > * {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
+	.runSummary {
+		display: grid;
 		gap: 0.25rem;
-		padding: 1rem 0.75rem;
+		grid-template-columns: 1.5rem repeat(5, 1fr);
+		padding: 1rem 0.5rem;
 	}
 
-	.run > summary > * > * {
-		width: 25%;
+	.runSummary > * {
 		overflow-x: auto;
 	}
 
@@ -242,27 +256,8 @@
 		color: red;
 	}
 
-	details summary::-webkit-details-marker {
-		display: none;
-	}
-
-	details summary {
-		cursor: pointer;
-	}
-
-	details summary > * {
-		display: inline;
-	}
-
-	details > summary {
-		list-style: none;
-	}
-	details > summary::-webkit-details-marker {
-		display: none;
-	}
-
-	details > div {
+	.runDetails {
 		border-top: 1px solid rgba(0, 0, 0, 0.2);
-		padding: 0.5rem 2rem;
+		padding: 0.75rem 3rem;
 	}
 </style>
