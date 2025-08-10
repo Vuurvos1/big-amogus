@@ -1,6 +1,13 @@
 <script>
 	import Header from '$lib/header/Header.svelte';
 	import '../app.css';
+	/**
+	 * @typedef {Object} Props
+	 * @property {import('svelte').Snippet} [children]
+	 */
+
+	/** @type {Props} */
+	let { children } = $props();
 </script>
 
 <svelte:head>
@@ -10,10 +17,10 @@
 <Header />
 
 <main>
-	<slot />
+	{@render children?.()}
 </main>
 
-<footer />
+<footer></footer>
 
 <style>
 	main {

@@ -1,16 +1,22 @@
 <script>
 	import { invalidateAll } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { onDestroy, onMount } from 'svelte';
-	export let data;
+
+	let { data } = $props();
+	let { schedule } = $derived(data);
+
+	let scheduleLines = $derived(schedule.lines);
 
 	const MINUTE = 60 * 1000;
 
-	let time = new Date();
+	let time = $state(new Date());
 
-	let runs = data.lines;
-	$: currentRun = runs.find(
-		(run, i, runs) => runs[i + 1] && time < new Date(runs[i + 1].date) && new Date(run.date) < time
+	let currentRun = $derived(
+		schedule.lines?.find(
+			(run, i, runs) =>
+				runs[i + 1] && time < new Date(runs[i + 1].date) && new Date(run.date) < time
+		)
 	);
 
 	/**
@@ -46,7 +52,7 @@
 	let timeOut;
 
 	/** @type {number | null} */
-	let activeRun = null;
+	let activeRun = $state(null);
 
 	onMount(() => {
 		// this could be done over a websocket if one exists???
@@ -59,16 +65,19 @@
 			}
 		}, MINUTE * 5);
 
-		timeOut = setTimeout(() => {
-			time = new Date();
-
-			// start timer
-			timer = setInterval(() => {
-				// upate time every minute
+		timeOut = setTimeout(
+			() => {
 				time = new Date();
-			}, MINUTE);
-			// offset timer to next full minute
-		}, MINUTE - (new Date().getTime() % MINUTE));
+
+				// start timer
+				timer = setInterval(() => {
+					// upate time every minute
+					time = new Date();
+				}, MINUTE);
+				// offset timer to next full minute
+			},
+			MINUTE - (new Date().getTime() % MINUTE)
+		);
 	});
 
 	onDestroy(() => {
@@ -79,10 +88,10 @@
 </script>
 
 <svelte:head>
-	<title>Bigoengus - {$page.params.slug}</title>
+	<title>Bigoengus - {page.params.slug}</title>
 </svelte:head>
 
-<h1>{$page.params.slug}</h1>
+<h1>{page.params.slug}</h1>
 {#if currentRun}
 	<a href="#{currentRun.id}"> Jump to current run </a>
 {/if}
@@ -97,9 +106,9 @@
 </div>
 
 <div class="runs">
-	{#each runs as run, i}
+	{#each scheduleLines as run, i}
 		<!-- this might not highlight the first run of a schedule -->
-		{#if i == 0 || (i > 1 && new Date(runs[i - 1].date).getDay() != new Date(run.date).getDay())}
+		{#if i == 0 || (i > 1 && new Date(scheduleLines[i - 1].date).getDay() != new Date(run.date).getDay())}
 			<div class="timie">
 				{new Date(run.date).toLocaleDateString('default', {
 					weekday: 'long',
@@ -114,7 +123,7 @@
 			class="run"
 			id={String(run.id)}
 			class:active={run.id === currentRun?.id}
-			on:click={() => {
+			onclick={() => {
 				if (activeRun === run.id) {
 					activeRun = null;
 					return;
@@ -137,26 +146,23 @@
 					<div>
 						{#each run.runners as runner}
 							<p>
-								{runner.username}
+								{runner.runnerName}
 							</p>
 						{/each}
 					</div>
 				{/if}
-				<!-- game -->
 				{#if run.setupBlockText}
 					<p>{run.setupBlockText}</p>
 				{:else if run.setupBlock}
 					<p>Setup Block</p>
 				{:else}
-					<p>{run.gameName}</p>
+					<p>{run.game}</p>
 				{/if}
 
-				<!-- cat -->
-				{#if run.categoryName}
-					<p>{run.categoryName}</p>
+				{#if run.category}
+					<p>{run.category}</p>
 				{/if}
 
-				<!-- est -->
 				<p>{formatDuration(run.estimate)}</p>
 			</div>
 
